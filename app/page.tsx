@@ -67,7 +67,7 @@ const DEMO = [
 ];
 
 /* ─── ENGINE ──────────────────────────────────────────────────────────────────*/
-function calcIQ(m) {
+function calcIQ(m: any) {
   const keys = Object.keys(B);
   let total = 0, maxTotal = 0;
   keys.forEach(k => {
