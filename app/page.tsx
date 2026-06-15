@@ -604,10 +604,11 @@ Write 5 bullets: what drops vs better players, 2 biggest risks, 2 match-day adju
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = ev => setCsvText(ev.target.result);
-    reader.readAsText(file);
+    
+  setCsvText((ev.target?.result as string) || "");
+};  reader.readAsText(file);
   }
-
+ reader.onload = (ev) => {
   /* ── Training Focus Generator ────────────────────────────────────────────── */
   const trainingFocus = (() => {
     const ws = weaknesses(avgStats, 3);
