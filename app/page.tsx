@@ -600,16 +600,19 @@ Write 5 bullets: what drops vs better players, 2 biggest risks, 2 match-day adju
     showToast(`Imported ${newM.length} matches from CSV`);
   }
 
-  function handleFileUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-   const reader = new FileReader();
+ function handleFileUpload(e: any) {
+  const file = e.target.files?.[0];
 
-reader.onload = (ev) => {
-  setCsvText((ev.target?.result as string) || "");
-};
+  if (!file) return;
 
-reader.readAsText(file); 
+  const reader = new FileReader();
+
+  reader.onload = (ev) => {
+    setCsvText((ev.target?.result as string) || "");
+  };
+
+  reader.readAsText(file);
+}
   /* ── Training Focus Generator ────────────────────────────────────────────── */
   const trainingFocus = (() => {
     const ws = weaknesses(avgStats, 3);
