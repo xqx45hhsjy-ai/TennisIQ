@@ -80,7 +80,7 @@ function calcIQ(m: any) {
   return Math.round(Math.min(100, (total / maxTotal) * 100));
 }
 
-function weaknesses(m, n = 4) {
+function weaknesses(m: any , n = 4) {
   return Object.entries(B).map(([k, { label, bench, unit, hi }]) => {
     const val = m[k] ?? 0;
     const gap = hi ? bench - val : val - bench;
