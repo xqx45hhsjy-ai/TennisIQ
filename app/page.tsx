@@ -378,7 +378,7 @@ function Card({ children, glow, style={} }: any) {
   );
 }
 
-const btn = (primary, sm) => ({
+const btn = (primary: any, disabled: any = false) => {
   background:primary?C.clay:C.lift, color:"#fff",
   border:primary?"none":`1px solid ${C.border}`,
   borderRadius:7, padding:sm?"6px 14px":"9px 20px",
