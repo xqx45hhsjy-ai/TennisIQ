@@ -263,21 +263,30 @@ function parseCSV(text) {
   lines.slice(1).forEach((line, i) => {
     if (!line.trim()) return;
     const vals = line.split(",").map(v => v.trim());
-    const obj = {};
-    headers.forEach((h, idx) => {
-      const key = fieldMap[h] || h;
-      obj[key] = vals[idx] || "";
-    });
-    const m = {
-      id: Date.now() + i,
-      date: obj.date || new Date().toISOString().slice(0,10),
-      opp: obj.opp || "Unknown",
-      oppUTR: parseFloat(obj.oppUTR) || 10.0,
-      surface: obj.surface || "Hard",
-      score: obj.score || "?",
-      won: obj.won === "true" || obj.won === "1" || obj.won?.toLowerCase() === "w" || obj.won?.toLowerCase() === "win",
-    };
-    Object.keys(B).forEach(k => { m[k] = parseFloat(obj[k]) || B[k].bench; });
+   const obj: any = {};
+
+headers.forEach((h, idx) => {
+  const key = fieldMap[h] || h;
+  obj[key] = vals[idx] || "";
+});
+
+const m: any = {
+  id: Date.now() + i,
+  date: obj.date || new Date().toISOString().slice(0, 10),
+  opp: obj.opp || "Unknown",
+  oppUTR: parseFloat(obj.oppUTR) || 10.0,
+  surface: obj.surface || "Hard",
+  score: obj.score || "?",
+  won:
+    obj.won === "true" ||
+    obj.won === "1" ||
+    obj.won?.toLowerCase() === "w" ||
+    obj.won?.toLowerCase() === "win",
+};
+
+Object.keys(B).forEach((k: any) => {
+  m[k] = parseFloat(obj[k]) || (B as any)[k].bench;
+});
     m.iq = calcIQ(m);
     matches.push(m);
   });
