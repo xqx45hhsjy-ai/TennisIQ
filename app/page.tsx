@@ -412,7 +412,7 @@ function AIBlock({ loading, text }) {
   );
 }
 
-const TT = ({ active, payload, label }) => {
+const TT = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload;
   return (
