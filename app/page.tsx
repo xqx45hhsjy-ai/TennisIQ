@@ -465,7 +465,7 @@ export default function TennisIQ() {
   const [predUTR, setPredUTR]     = useState("");
   const [toast, setToast]         = useState("");
   const [coachView, setCoachView] = useState("insights"); // insights | predict | training
-  const fileRef = useRef();
+  const fileRef = useRef<HTMLInputElement |null>(null);
 
   const [nm, setNm] = useState({
     opp:"", oppUTR:"", score:"", won:"true", surface:"Hard",
