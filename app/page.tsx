@@ -89,7 +89,7 @@ function weaknesses(m: any , n = 4) {
   }).filter(x => x.gap > 0).sort((a,b) => b.pct - a.pct).slice(0, n);
 }
 
-function strengths(m: any n = 3) {
+function strengths(m: any , n = 3) {
   return Object.entries(B).map(([k, { label, bench, unit, hi }]) => {
     const val = m[k] ?? 0;
     const pct = hi ? Math.round(((val - bench)/bench)*100) : Math.round(((bench - val)/bench)*100);
