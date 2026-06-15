@@ -583,7 +583,7 @@ Write 5 bullets: what drops vs better players, 2 biggest risks, 2 match-day adju
   }
 
   function addMatch() {
-    const m = { ...nm, id:Date.now(), oppUTR:parseFloat(nm.oppUTR), won:nm.won==="true",
+    const m: any = { ...nm, id:Date.now(), oppUTR:parseFloat(nm.oppUTR), won:nm.won==="true",
       ...Object.fromEntries(Object.keys(B).map(k=>[k,+nm[k]]))
     };
     m.iq = calcIQ(m);
