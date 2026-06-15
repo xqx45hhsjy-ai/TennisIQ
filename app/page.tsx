@@ -357,7 +357,7 @@ function StatRow({ label, val, bench, unit, hi }) {
   );
 }
 
-function Section({ title, children, action }) {
+function Section({ title, children, action }: any) {
   return (
     <div style={{ marginBottom:24 }}>
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
