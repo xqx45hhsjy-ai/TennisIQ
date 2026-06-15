@@ -68,7 +68,7 @@ const DEMO = [
 
 /* ─── ENGINE ──────────────────────────────────────────────────────────────────*/
 function calcIQ(m: any) {
-  const keys = Object.keys(B) as (keyof typeof B);
+  const keys = Object.keys(B) as Array<keyof typeof B>;
   let total = 0, maxTotal = 0;
   keys.forEach(k => {
     const { bench, hi, weight } = B[k];
