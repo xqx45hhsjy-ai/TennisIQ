@@ -97,7 +97,7 @@ function strengths(m: any , n = 3) {
   }).filter(x => x.pct > 0).sort((a,b) => b.pct - a.pct).slice(0, n);
 }
 
-function utrImpact(ws) {
+function utrImpact(ws: any[]) {
   const total = ws.reduce((s, w) => s + w.pct, 0);
   return Math.round((total / 100) * 0.45 * 10) / 10;
 }
