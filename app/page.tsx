@@ -369,7 +369,7 @@ function Section({ title, children, action }) {
   );
 }
 
-function Card({ children, glow, style={} }) {
+function Card({ children, glow, style={} }: any) {
   return (
     <div style={{ background:C.panel, border:`1px solid ${glow?C.clay+"66":C.border}`,
       borderRadius:12, padding:"20px 22px", ...style }}>
