@@ -378,12 +378,23 @@ function Card({ children, glow, style={} }: any) {
   );
 }
 
-const btn = (primary: any, disabled: any = false) => {
-  background:primary?C.clay:C.lift, color:"#fff",
-  border:primary?"none":`1px solid ${C.border}`,
-  borderRadius:7, padding:sm?"6px 14px":"9px 20px",
-  fontSize:sm?12:13, fontWeight:700, cursor:"pointer",
-  letterSpacing:0.4, fontFamily:FONT.display, transition:"opacity 0.15s",
+const btn = (
+  primary: any,
+  disabled: any = false,
+  sm: any = false
+) => ({
+  background: primary ? C.clay : C.lift,
+  color: "#fff",
+  border: primary ? "none" : `1px solid ${C.border}`,
+  borderRadius: 7,
+  padding: sm ? "6px 14px" : "9px 20px",
+  fontSize: sm ? 12 : 13,
+  fontWeight: 700,
+  cursor: "pointer",
+  letterSpacing: 0.4,
+  fontFamily: FONT.display,
+  transition: "opacity 0.15s",
+  opacity: disabled ? 0.55 : 1,
 });
 
 const inp = { background:C.lift, border:`1px solid ${C.border}`, color:C.text,
