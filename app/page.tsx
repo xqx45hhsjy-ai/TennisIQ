@@ -390,7 +390,7 @@ const btn = (
   padding: sm ? "6px 14px" : "9px 20px",
   fontSize: sm ? 12 : 13,
   fontWeight: 700,
-  cursor: "pointer",
+  cursor: disabled ? "not-allowed" : "pointer",
   letterSpacing: 0.4,
   fontFamily: FONT.display,
   transition: "opacity 0.15s",
