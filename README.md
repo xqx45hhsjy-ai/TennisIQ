@@ -1,3 +1,33 @@
+# TennisIQ
+
+AI-powered tennis analytics platform built by a competitive junior tennis player.
+
+## Features
+
+- Match logging
+- CSV import
+- TennisIQ scoring engine
+- AI Coach
+- UTR prediction
+- Performance analytics
+- Interactive charts
+
+## Tech Stack
+
+- Next.js
+- React
+- TypeScript
+- Vercel
+
+## Live Demo
+https://tennis-iq-hb6h-6g8vuh6m7-shivraj-s-projects3.vercel.app/
+
+## Screenshots
+
+
+
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
