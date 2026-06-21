@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer,
   LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine,
@@ -33,11 +33,18 @@ const FONT = {
   mono:    "'JetBrains Mono','Fira Mono',monospace",
 };
 const SURFACE_COL = { Hard:"#4A9EFF", Clay:C.clay, Grass:"#00C97F", Indoor:"#9B6DFF" };
+const FEEDBACK_CLOSED_KEY = "tennisiq_feedback_closed_at";
+const FEEDBACK_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScubOEWUXdwc0XSq6zIF4BtY9XTJIYtllo8GV8pA9Jd7pl4jw/viewform?usp=publish-editor";
 const videoLibrary = {
-  firstServeIn: [
+  firstServe: [
     ["Djokovic serve — slow motion", "https://www.youtube.com/results?search_query=djokovic+serve+slow+motion"],
     ["Mouratoglou — improve first serve", "https://www.youtube.com/results?search_query=mouratoglou+improve+first+serve"],
     ["ATP serve fundamentals", "https://www.youtube.com/results?search_query=ATP+serve+fundamentals"],
+  ],
+  secondServe: [
+    ["Serve placement and kick drills", "https://www.youtube.com/results?search_query=second+serve+drills"],
+    ["High-percentage second serve", "https://www.youtube.com/results?search_query=high+percentage+second+serve"],
+    ["Pressure second serve training", "https://www.youtube.com/results?search_query=second+serve+pressure+training"],
   ],
   returnWon: [
     ["Djokovic return technique", "https://www.youtube.com/results?search_query=djokovic+return+technique"],
@@ -49,15 +56,148 @@ const videoLibrary = {
     ["Agassi rally tolerance", "https://www.youtube.com/results?search_query=agassi+rally+tolerance"],
     ["ATP consistency training", "https://www.youtube.com/results?search_query=ATP+consistency+training"],
   ],
+  netPlay: [
+    ["Net play volleys and finishing", "https://www.youtube.com/results?search_query=net+play+volleys"],
+    ["Approach shot and volley combos", "https://www.youtube.com/results?search_query=approach+shot+volley+combos"],
+    ["Topspin volley drills", "https://www.youtube.com/results?search_query=topspin+volley+drills"],
+  ],
 };
 
 const coaching = {
-  firstServeIn:  { problem:"Toss consistency and rhythm are unstable.", ideal:"65–70%", causes:["Toss drifting left","Early acceleration","Poor ball toss height"], drills:["Basket serving","Three-zone target serving","Rhythm serving"] },
-  firstServeWon: { problem:"Serve is not earning enough free points.", ideal:"74%+", causes:["Predictable location","Passive serve +1","Low body usage"], drills:["Serve +1 patterns","Wide/T/body sequences","First-ball attack"] },
-  secondServeWon: { problem:"Second serve is being attacked too often.", ideal:"55%+", causes:["Low net clearance","Insufficient spin","Defensive first ball"], drills:["Kick serve ladder","Backhand body targets","Second-serve pressure sets"] },
-  returnWon:    { problem:"Return is too late against pace.", ideal:"45%+", causes:["Late split-step","Large backswing","Too-deep start position"], drills:["Short-backswing returns","Split-step timing","Deep-middle return targets"] },
-  unforced:     { problem:"Errors come before point construction finishes.", ideal:"14 or fewer", causes:["Rushing neutral balls","Low net margin","Changing direction too early"], drills:["20-ball consistency","Crosscourt lock","Pressure tiebreaks"] },
+  firstServeIn: {
+    label: "1st Serve In %",
+    problem: "Low first-serve percentage is making service games too defensive.",
+    why: "Missing first serves forces more second serves, giving opponents easier return opportunities.",
+    drills: ["Target serving", "Serve toss consistency", "Footwork into the court"],
+    focus: "Simplify the motion and prioritise first-ball accuracy over power.",
+    videoKey: "firstServe",
+  },
+  firstServeWon: {
+    label: "1st Serve Won %",
+    problem: "The first serve is not earning enough free points.",
+    why: "When the first serve isn’t winning points, opponents stay in the rally and pressure the second serve.",
+    drills: ["Wide/body serve patterns", "Serve +1 attack", "High-percentage placement"],
+    focus: "Build serve confidence by targeting safer zones and adding variety.",
+    videoKey: "firstServe",
+  },
+  secondServeWon: {
+    label: "2nd Serve Won %",
+    problem: "The second serve is being attacked too often.",
+    why: "A weak second serve invites strong returns and reduces your chance to hold serve.",
+    drills: ["Kick serve ladder", "Deep second serve targets", "High net clearance practice"],
+    focus: "Increase spin and depth to make the second serve harder to attack.",
+    videoKey: "secondServe",
+  },
+  returnWon: {
+    label: "Return Won %",
+    problem: "Return points won is below the expected level.",
+    why: "A low return win rate means fewer break opportunities and more defensive play.",
+    drills: ["Shortening return backswing", "Split-step timing", "Return to the middle"],
+    focus: "Improve return position and first strike on the opponent’s serve.",
+    videoKey: "returnWon",
+  },
+  unforced: {
+    label: "Unforced Errors",
+    problem: "Too many unforced errors are costing free points.",
+    why: "High error counts undermine match rhythm and reduce confidence in pressure moments.",
+    drills: ["Consistency rally sets", "Deep crosscourt drills", "Pressure tolerance sessions"],
+    focus: "Focus on margin and controlled point construction, not power.",
+    videoKey: "unforced",
+  },
+  winners: {
+    label: "Winners",
+    problem: "Winner production is lower than needed to finish points.",
+    why: "Without enough winners, you spend more time in long rallies and give opponents recovery chances.",
+    drills: ["Approach shot finishing", "Short-court aggression", "Improved forehand timing"],
+    focus: "Find cleaner opportunities to finish inside the court.",
+    videoKey: "netPlay",
+  },
+  doubleFaults: {
+    label: "Double Faults",
+    problem: "Too many double faults are giving away free points.",
+    why: "Double faults kill serve momentum and hand opponents easy breaks.",
+    drills: ["Second serve routine", "Toss placement consistency", "Rhythm serving"],
+    focus: "Use a repeatable serve routine and avoid rushed motion on second serve.",
+    videoKey: "firstServe",
+  },
+  netPoints: {
+    label: "Net Points Won %",
+    problem: "Net play success is below benchmark.",
+    why: "Weak net finishing reduces your ability to close points when attacking.",
+    drills: ["Volleys under pressure", "Approach and volley drills", "Short-court quick hands"],
+    focus: "Improve net coverage and decision-making on approach shots.",
+    videoKey: "netPlay",
+  },
 };
+
+function getCoachingSeverity(metric: string, value: number) {
+  const config = B[metric as keyof typeof B];
+  if (!config) return 0;
+  const gap = config.hi ? Math.max(0, config.bench - value) : Math.max(0, value - config.bench);
+  return gap / Math.max(config.bench, 1);
+}
+
+function getCoachEstimates(metric: string, gap: number) {
+  const config = B[metric as keyof typeof B];
+  if (!config) return { improvement:"Review match patterns", impact:"0.0 UTR" };
+  const points = Math.max(1, Math.round(Math.min(gap * (config.hi ? 0.75 : 0.6), config.hi ? 8 : 6)));
+  const impact = Math.round(Math.min(1.0, gap * 0.12) * 10) / 10;
+  return {
+    improvement: config.hi ? `Increase by ${points}%` : `Reduce by ${points}`,
+    impact: `${impact.toFixed(1)} UTR`,
+  };
+}
+
+function buildCoachingSummary(stats: any, label: string) {
+  const keys = ["firstServeIn","firstServeWon","secondServeWon","returnWon","unforced","winners","doubleFaults","netPoints"];
+  const candidate = keys
+    .map(k => {
+      const val = stats[k];
+      if (typeof val !== "number") return null;
+      const config = coaching[k as keyof typeof coaching];
+      const bench = B[k as keyof typeof B].bench;
+      const hi = B[k as keyof typeof B].hi;
+      const gap = hi ? Math.max(0, bench - val) : Math.max(0, val - bench);
+      if (gap <= 0) return null;
+      return {
+        key: k,
+        label: config.label,
+        problem: config.problem,
+        why: config.why,
+        drills: config.drills,
+        focus: config.focus,
+        videoKey: config.videoKey,
+        gap,
+        severity: getCoachingSeverity(k, val),
+        ...getCoachEstimates(k, gap),
+      };
+    })
+    .filter(Boolean)
+    .sort((a,b) => b.severity - a.severity)
+    .slice(0, 3);
+
+  if (!candidate.length) {
+    return { lines: [`Log more matches to unlock advanced coaching.`], videoMetrics: [] };
+  }
+
+  const lines = [`${label} analysis based on real logged match stats:`];
+  const videoMetrics = [] as string[];
+
+  candidate.forEach(item => {
+    lines.push(`• ${item.label}: ${item.problem}`);
+    lines.push(`• Why it matters: ${item.why}`);
+    lines.push(`• Suggested drills: ${item.drills.join(", ")}`);
+    lines.push(`• Training focus: ${item.focus}`);
+    lines.push(`• Expected improvement: ${item.improvement}`);
+    lines.push(`• Estimated UTR impact: ${item.impact}`);
+    if (item.videoKey) {
+      if (!videoMetrics.includes(item.videoKey)) videoMetrics.push(item.videoKey);
+      lines.push(`• Review video recommendations for ${item.label}.`);
+    }
+    lines.push("");
+  });
+  return { lines, videoMetrics };
+}
 
 /* ─── BENCHMARKS ──────────────────────────────────────────────────────────────*/
 const B = {
@@ -590,6 +730,10 @@ export default function TennisIQ() {
   const [newTournament, setNewTournament] = useState({ ...emptyTournament });
   const fileRef = useRef<HTMLInputElement |null>(null);
 
+  const [targetPlan, setTargetPlan] = useState<any>(null);
+  const [coachVideoMetrics, setCoachVideoMetrics] = useState<string[]>([]);
+  const [showFeedbackPopup, setShowFeedbackPopup] = useState(false);
+
   const [nm, setNm] = useState({
     opp:"", oppUTR:"", score:"", won:"true", surface:"Hard",
     date:new Date().toISOString().slice(0,10),
@@ -597,6 +741,28 @@ export default function TennisIQ() {
     aces:6,doubleFaults:3,winners:22,unforced:13,netPoints:62,breakPtsConv:40,
    id: Date.now(),
   });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const closedAt = parseInt(localStorage.getItem(FEEDBACK_CLOSED_KEY) || "", 10);
+    if (!closedAt || Number.isNaN(closedAt) || Date.now() - closedAt >= 30 * 24 * 60 * 60 * 1000) {
+      const timer = window.setTimeout(() => setShowFeedbackPopup(true), 10000);
+      return () => window.clearTimeout(timer);
+    }
+    return undefined;
+  }, []);
+
+  const closeFeedbackPopup = () => {
+    setShowFeedbackPopup(false);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(FEEDBACK_CLOSED_KEY, String(Date.now()));
+    }
+  };
+
+  const openFeedbackForm = () => {
+    window.open(FEEDBACK_FORM_URL, "_blank", "noopener,noreferrer");
+    closeFeedbackPopup();
+  };
 
   const showToast = msg => { setToast(msg); setTimeout(() => setToast(""), 2800); };
 
@@ -699,50 +865,31 @@ const trend =
   }
 
   function analyseMatch(m) {
-    const ws = weaknesses(m); const ss = strengths(m);
-    callAI(`You are an elite tennis analytics coach for a junior player (UTR 10.1, USTA Junior).
-
-Match vs ${m.opp} (UTR ${m.oppUTR}) — ${m.won?"WIN":"LOSS"} ${m.score} on ${m.surface}
-TennisIQ: ${m.iq}/100
-
-Weaknesses vs benchmark:
-${ws.map(w=>`• ${w.label}: ${w.val}${w.unit} (need ${w.bench}${w.unit}, ${w.pct}% gap)`).join("\n")}
-
-Strengths:
-${ss.map(s=>`• ${s.label}: ${s.val}${s.unit} (+${s.pct}% above benchmark)`).join("\n")}
-
-Surface: ${m.surface}. Give 5 sharp, tactical, data-driven bullet points. Be direct and specific. Start each with "•".`);
+    const { lines, videoMetrics } = buildCoachingSummary(m, "Match");
+    setAiText(lines.join("\n"));
+    setCoachVideoMetrics(videoMetrics);
   }
 
   function runCoachReport() {
-    const ws = weaknesses(avgStats, 3);
-    const ss = strengths(avgStats, 3);
-    const surfNotes = surfaceStats.map(s => `${s.surface}: ${s.wr}% WR, avg IQ ${s.iq} (${s.count} matches)`).join("; ");
-    callAI(`You are an elite tennis analytics coach. This is a full season analysis for a UTR 10.1 junior player.
-
-SEASON STATS (${matches.length} matches, ${winRate}% WR, avg IQ ${avgIQ}):
-Top weaknesses: ${ws.map(w=>`${w.label} ${w.val}${w.unit} (benchmark ${w.bench}${w.unit})`).join(", ")}
-Top strengths: ${ss.map(s=>`${s.label} ${s.val}${s.unit}`).join(", ")}
-Surface breakdown: ${surfNotes}
-
-DATA INSIGHTS:
-${insights.map(i=>`• ${i.text}`).join("\n")}
-
-UTR trend: ${utrPred ? `Predicted ${utrPred.predicted} in next 10 matches (${utrPred.delta>=0?"+":""}${utrPred.delta} from current 10.1)` : "insufficient data"}
-
-Generate a 6-bullet elite coaching report covering: (1) primary weakness to fix this month, (2) serve strategy recommendation, (3) surface-specific advice, (4) return game improvement, (5) mental/competitive pattern, (6) training priority. Start each with "•". Be direct, data-driven, and specific.`);
+    const { lines, videoMetrics } = buildCoachingSummary(avgStats, "Season");
+    setAiText(lines.join("\n"));
+    setCoachVideoMetrics(videoMetrics);
   }
-
   function runScout() {
     const opp = parseFloat(scoutUTR);
     if (isNaN(opp)) return;
     const hi = matches.filter(m => m.oppUTR >= 10.2);
-    const lo = matches.filter(m => m.oppUTR  < 10.2);
-    const avg = (arr,k) => arr.length ? Math.round(arr.reduce((s,m)=>s+(m[k]||0),0)/arr.length) : 0;
+    const lo = matches.filter(m => m.oppUTR < 10.2);
+    const avg = (arr, k) => arr.length ? Math.round(arr.reduce((sum, match) => sum + (match[k] || 0), 0) / arr.length) : 0;
     const patterns = Object.keys(B).map(k => ({
-      stat:B[k].label, vsHigh:avg(hi,k), vsLow:avg(lo,k), bench:B[k].bench, unit:B[k].unit
+      stat: B[k].label,
+      vsHigh: avg(hi, k),
+      vsLow: avg(lo, k),
+      bench: B[k].bench,
+      unit: B[k].unit,
     }));
-    setScoutData({ opp, prob:winProb(avgIQ,opp), patterns });
+
+    setScoutData({ opp, prob: winProb(avgIQ, opp), patterns });
     callAI(`Tennis scout. Player: UTR 10.1, avg IQ ${avgIQ}. Upcoming opponent: UTR ${opp}.
 Stats vs HIGH UTR (10.2+): ${patterns.map(p=>`${p.stat} ${p.vsHigh}${p.unit}`).join(", ")}
 Stats vs LOWER UTR: ${patterns.map(p=>`${p.stat} ${p.vsLow}${p.unit}`).join(", ")}
@@ -751,22 +898,20 @@ Write 5 bullets: what drops vs better players, 2 biggest risks, 2 match-day adju
   }
 
   function addMatch() {
-    const m: any = { ...nm, id:Date.now(), oppUTR:parseFloat(nm.oppUTR), won:nm.won==="true",
+    const m: any = {
+      ...nm,
+      id: Date.now(),
+      oppUTR: parseFloat(nm.oppUTR),
+      won: nm.won === "true",
       ...Object.fromEntries(
-        Object.keys(B).map(k=> [
+        Object.keys(B).map(k => [
           k,
-          +(nm[k]  ?? B[k].bench)
+          +(nm[k] ?? B[k].bench),
         ])
-      )
+      ),
     };
     m.iq = calcIQ(m);
-    setMatches(prev => [
-  ...prev,
-  {
-    ...nm,
-    id: Date.now(),
-  }
-]);
+    setMatches(prev => [...prev, m]);
     setShowAdd(false);
     showToast(`Match vs ${m.opp} logged — IQ ${m.iq}`);
   }
@@ -864,11 +1009,15 @@ Write 5 bullets: what drops vs better players, 2 biggest risks, 2 match-day adju
   })();
 
   /* ── Nav ─────────────────────────────────────────────────────────────────── */
+  // Reordered for core workflow: Log first, then Coach, Compare, Target, Planner, Budget, Scout
   const TABS = [
-    ["coach","🧠 Coach"],["dashboard","Overview"],
-    ["compare","Benchmark"],["scout","Scout"],
-    ["predict","Predictor"],["progress","Progress"],["log","Log"],
-    ["planner","Planner"],["target","Target UTR"],["improve","Improvement"],["videos","Videos"],
+    ["log","📝 Log Match"],
+    ["coach","🧠 AI Coach"],
+    ["compare","🔍 Compare"],
+    ["target","🎯 UTR Target"],
+    ["planner","📅 Tournament Planner"],
+    ["dashboard","💰 Budget Dashboard"],
+    ["scout","🕵️ Scout"],
   ];
 
   return (
@@ -903,6 +1052,41 @@ Write 5 bullets: what drops vs better players, 2 biggest risks, 2 match-day adju
           padding:"10px 22px", color:C.live, fontSize:13, fontWeight:600,
           zIndex:9999, animation:"fadeUp .3s ease", boxShadow:"0 8px 32px #0008" }}>
           ✓ {toast}
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div style={{ position:"fixed", bottom:24, left:"50%", transform:"translateX(-50%)",
+          background:C.panel, border:`1px solid ${C.live}66`, borderRadius:10,
+          padding:"10px 22px", color:C.live, fontSize:13, fontWeight:600,
+          zIndex:9999, animation:"fadeUp .3s ease", boxShadow:"0 8px 32px #0008" }}>
+          ✓ {toast}
+        </div>
+      )}
+
+      {showFeedbackPopup && (
+        <div onClick={closeFeedbackPopup} style={{ position:"fixed", inset:0, background:"rgba(8,15,24,0.72)", display:"flex", alignItems:"center", justifyContent:"center", padding:20, zIndex:9998, opacity:1, animation:"fadeUp .25s ease" }}>
+          <div onClick={e => e.stopPropagation()} style={{ width:"min(520px,100%)", background:C.panel, border:`1px solid ${C.border}`, borderRadius:24, boxShadow:"0 30px 90px rgba(0,0,0,0.45)", padding:28, position:"relative", transform:"scale(1)", transition:"transform .25s ease, opacity .25s ease", opacity:1 }}>
+            <button onClick={closeFeedbackPopup} style={{ position:"absolute", top:16, right:16, width:36, height:36, borderRadius:18, border:"1px solid rgba(255,255,255,0.12)", background:"rgba(255,255,255,0.04)", color:C.text, fontSize:18, cursor:"pointer" }}>
+              ×
+            </button>
+            <div style={{ display:"flex", gap:14, alignItems:"center", marginBottom:16 }}>
+              <div style={{ width:44, height:44, borderRadius:18, background:C.live, display:"grid", placeItems:"center", color:C.court, fontSize:18, fontWeight:800 }}>
+                💬
+              </div>
+              <div>
+                <div style={{ fontSize:18, fontWeight:800, color:C.text, marginBottom:4 }}>Built by a Competitive Junior Player.</div>
+                <div style={{ fontSize:13, color:C.sub, lineHeight:1.7 }}>I'm building TennisIQ to help players track matches, improve, and plan their journey.</div>
+              </div>
+            </div>
+            <p style={{ margin:0, color:C.text, fontSize:14, lineHeight:1.8, marginBottom:22 }}>
+              I'd love your feedback. It will take you just a minute.
+            </p>
+            <button onClick={openFeedbackForm} style={{ width:"100%", padding:"14px 18px", background:C.live, color:C.court, border:`1px solid ${C.live}`, fontSize:14, fontWeight:700, borderRadius:14, cursor:"pointer" }}>
+              💬 Give Feedback
+            </button>
+          </div>
         </div>
       )}
 
@@ -954,6 +1138,30 @@ Write 5 bullets: what drops vs better players, 2 biggest risks, 2 match-day adju
 
       <div style={{ padding:"30px 28px 42px", maxWidth:1180, margin:"0 auto", display:"flex", flexDirection:"column", gap:26 }}>
 
+        {/* Onboarding: show welcome card when no matches logged */}
+        {matches.length === 0 && (
+          <div style={{ animation: "fadeUp .45s ease" }}>
+            <Card glow style={{ display: "flex", gap: 18, alignItems: "center", padding: 24, marginBottom: 18, borderRadius: 18, flexWrap: "wrap" }}>
+              <div style={{ flex: 1, minWidth: 240 }}>
+                <div style={{ fontSize: 22, fontWeight: 900, color: C.text }}>Welcome to TennisIQ 🎾</div>
+                <p style={{ color: C.sub, marginTop: 10, lineHeight: 1.6 }}>
+                  <strong>Step 1:</strong> Log your first match.
+                  <br />
+                  Everything else — AI Coach, Compare, UTR Targets and Progress — becomes more useful after you start logging matches.
+                </p>
+                <div style={{ marginTop: 14 }}>
+                  <button style={btn(true)} onClick={() => { setTab("log"); setShowAdd(true); setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 80); }}>
+                    Log First Match
+                  </button>
+                </div>
+              </div>
+              <div style={{ width: 140, display: 'flex', justifyContent: 'center' }}>
+                <IQRing score={10} size={120} />
+              </div>
+            </Card>
+          </div>
+        )}
+
         {/* ══ COACH TAB ══════════════════════════════════════════════════════*/}
         {tab === "coach" && (
           <div style={{ animation:"fadeUp .4s ease" }}>
@@ -1000,6 +1208,18 @@ Write 5 bullets: what drops vs better players, 2 biggest risks, 2 match-day adju
                 </Card>
 
                 <AIBlock loading={aiLoading} text={aiText} />
+
+                {coachVideoMetrics.length > 0 && (
+                  <Card style={{ marginTop:18 }}>
+                    <Section title="Video Recommendations">
+                      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))", gap:14 }}>
+                        {coachVideoMetrics.map(metric => (
+                          <Videos key={metric} metric={metric} />
+                        ))}
+                      </div>
+                    </Section>
+                  </Card>
+                )}
 
                 {/* Surface Performance */}
                 <Card style={{ marginTop:18 }}>
@@ -1415,6 +1635,127 @@ Format as 5 bullets with specific drills, durations, and goals. Start each with 
                 )}
               </Section>
             </Card>
+          </div>
+        )}
+
+        {/* ══ UTR TARGET ═════════════════════════════════════════════════════─*/}
+        {tab === "target" && (
+          <div style={{ animation:"fadeUp .4s ease" }}>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))", gap:14, marginBottom:22 }}>
+              <Card>
+                <Section title="UTR Target Planner">
+                  <div style={{ display:"grid", gap:10 }}>
+                    <div style={{ display:"grid", gap:6 }}>
+                      <label style={{ fontSize:12, color:C.sub, fontWeight:700 }}>Current UTR</label>
+                      <input name="currentUtr" value={currentUtr} onChange={e => setCurrentUtr(e.target.value)} placeholder="e.g. 10.1" style={inp} />
+                    </div>
+                    <div style={{ display:"grid", gap:6 }}>
+                      <label style={{ fontSize:12, color:C.sub, fontWeight:700 }}>Target UTR</label>
+                      <input name="targetUtr" value={targetUtr} onChange={e => setTargetUtr(e.target.value)} placeholder="e.g. 11.0" style={inp} />
+                    </div>
+                    <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+                      <label style={{ fontSize:12, color:C.sub, fontWeight:700, minWidth:90 }}>Timeline</label>
+                      <select value={timeframe} onChange={e => setTimeframe(e.target.value)} style={{ ...inp, width:140 }}>
+                        <option value="3">3 months</option>
+                        <option value="6">6 months</option>
+                        <option value="12">12 months</option>
+                      </select>
+                      <div style={{ marginLeft:"auto" }}>
+                        <button style={btn(true)} onClick={() => {
+                          if (!currentUtr || !targetUtr) return setTargetPlan(null);
+                          const cur = Number(currentUtr);
+                          const tgt = Number(targetUtr);
+                          if (isNaN(cur) || isNaN(tgt)) return setTargetPlan(null);
+                          const gap = Math.max(0, tgt - cur);
+                          const mult = ({ "3":1.25, "6":1, "12":0.72 } as any)[timeframe] || 1;
+                          const qualityWins = Math.max(0, Math.ceil(gap * 5 * mult));
+                          const upsetWins = Math.max(0, Math.ceil(gap * 8 * mult));
+                          const months = Number(timeframe) || 1;
+                          const tournamentsPerMonth = Math.max(0, Math.ceil((qualityWins + upsetWins) / months / 2));
+                          const improvement = Math.ceil(gap * 2);
+                          const benchmarks = {
+                            firstServeIn: Math.min(95, Math.round(B.firstServeIn.bench + improvement*2)),
+                            firstServeWon: Math.min(95, Math.round(B.firstServeWon.bench + improvement*2)),
+                            secondServeWon: Math.min(95, Math.round(B.secondServeWon.bench + improvement*1.5)),
+                            returnWon: Math.min(95, Math.round(B.returnWon.bench + improvement*2)),
+                            unforced: Math.max(0, Math.round(B.unforced.bench - improvement*2)),
+                          };
+                          setTargetPlan({ gap, qualityWins, upsetWins, tournamentsPerMonth, benchmarks });
+                        }}>Generate Plan</button>
+                      </div>
+                    </div>
+                  </div>
+                </Section>
+              </Card>
+
+              <Card>
+                <Section title="Quick Summary">
+                  {!currentUtr || !targetUtr ? (
+                    <p style={{ color:C.sub }}>Enter your current and target UTR to generate a plan.</p>
+                  ) : (!targetPlan) ? (
+                    <p style={{ color:C.sub }}>Click "Generate Plan" to calculate suggested wins and benchmarks.</p>
+                  ) : (
+                    <div style={{ display:"grid", gap:10 }}>
+                      <div style={{ display:"flex", justifyContent:"space-between" }}>
+                        <div style={{ color:C.sub }}>UTR Gap</div>
+                        <div style={{ fontWeight:800 }}>{targetPlan.gap.toFixed(2)}</div>
+                      </div>
+                      <div style={{ display:"flex", justifyContent:"space-between" }}>
+                        <div style={{ color:C.sub }}>Suggested quality wins</div>
+                        <div style={{ fontWeight:800 }}>{targetPlan.qualityWins}</div>
+                      </div>
+                      <div style={{ display:"flex", justifyContent:"space-between" }}>
+                        <div style={{ color:C.sub }}>Suggested upset wins</div>
+                        <div style={{ fontWeight:800 }}>{targetPlan.upsetWins}</div>
+                      </div>
+                      <div style={{ display:"flex", justifyContent:"space-between" }}>
+                        <div style={{ color:C.sub }}>Tournaments / month</div>
+                        <div style={{ fontWeight:800 }}>{targetPlan.tournamentsPerMonth}</div>
+                      </div>
+                    </div>
+                  )}
+                </Section>
+              </Card>
+
+              <Card>
+                <Section title="Target Benchmarks">
+                  {!targetPlan ? (
+                    <p style={{ color:C.sub }}>Benchmarks will appear after generating a plan.</p>
+                  ) : (
+                    <div style={{ display:"grid", gap:8 }}>
+                      <div style={{ display:"flex", justifyContent:"space-between" }}>
+                        <div style={{ color:C.sub }}>1st Serve In %</div>
+                        <div style={{ fontWeight:800 }}>{targetPlan.benchmarks.firstServeIn}%</div>
+                      </div>
+                      <div style={{ display:"flex", justifyContent:"space-between" }}>
+                        <div style={{ color:C.sub }}>1st Serve Won %</div>
+                        <div style={{ fontWeight:800 }}>{targetPlan.benchmarks.firstServeWon}%</div>
+                      </div>
+                      <div style={{ display:"flex", justifyContent:"space-between" }}>
+                        <div style={{ color:C.sub }}>2nd Serve Won %</div>
+                        <div style={{ fontWeight:800 }}>{targetPlan.benchmarks.secondServeWon}%</div>
+                      </div>
+                      <div style={{ display:"flex", justifyContent:"space-between" }}>
+                        <div style={{ color:C.sub }}>Return Won %</div>
+                        <div style={{ fontWeight:800 }}>{targetPlan.benchmarks.returnWon}%</div>
+                      </div>
+                      <div style={{ display:"flex", justifyContent:"space-between" }}>
+                        <div style={{ color:C.sub }}>Unforced Errors</div>
+                        <div style={{ fontWeight:800 }}>{targetPlan.benchmarks.unforced}</div>
+                      </div>
+                    </div>
+                  )}
+                </Section>
+              </Card>
+            </div>
+
+            <div style={{ display:"grid", gridTemplateColumns:"1fr", gap:18 }}>
+              <Card>
+                <Section title="Plan Notes">
+                  <p style={{ color:C.sub }}>This planner generates suggested targets using simple heuristics based on the UTR gap and timeline. Use it as a guideline — train to improve the benchmarks while increasing quality of competition.</p>
+                </Section>
+              </Card>
+            </div>
           </div>
         )}
 
