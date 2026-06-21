@@ -33,31 +33,6 @@ const FONT = {
   mono:    "'JetBrains Mono','Fira Mono',monospace",
 };
 const SURFACE_COL = { Hard:"#4A9EFF", Clay:C.clay, Grass:"#00C97F", Indoor:"#9B6DFF" };
-const videoLibrary = {
-  firstServeIn: [
-    ["Djokovic serve — slow motion", "https://www.youtube.com/results?search_query=djokovic+serve+slow+motion"],
-    ["Mouratoglou — improve first serve", "https://www.youtube.com/results?search_query=mouratoglou+improve+first+serve"],
-    ["ATP serve fundamentals", "https://www.youtube.com/results?search_query=ATP+serve+fundamentals"],
-  ],
-  returnWon: [
-    ["Djokovic return technique", "https://www.youtube.com/results?search_query=djokovic+return+technique"],
-    ["Agassi return masterclass", "https://www.youtube.com/results?search_query=agassi+return+masterclass"],
-    ["ATP return basics", "https://www.youtube.com/results?search_query=ATP+return+basics"],
-  ],
-  unforced: [
-    ["Djokovic consistency drill", "https://www.youtube.com/results?search_query=djokovic+consistency+drill"],
-    ["Agassi rally tolerance", "https://www.youtube.com/results?search_query=agassi+rally+tolerance"],
-    ["ATP consistency training", "https://www.youtube.com/results?search_query=ATP+consistency+training"],
-  ],
-};
-
-const coaching = {
-  firstServeIn:  { problem:"Toss consistency and rhythm are unstable.", ideal:"65–70%", causes:["Toss drifting left","Early acceleration","Poor ball toss height"], drills:["Basket serving","Three-zone target serving","Rhythm serving"] },
-  firstServeWon: { problem:"Serve is not earning enough free points.", ideal:"74%+", causes:["Predictable location","Passive serve +1","Low body usage"], drills:["Serve +1 patterns","Wide/T/body sequences","First-ball attack"] },
-  secondServeWon: { problem:"Second serve is being attacked too often.", ideal:"55%+", causes:["Low net clearance","Insufficient spin","Defensive first ball"], drills:["Kick serve ladder","Backhand body targets","Second-serve pressure sets"] },
-  returnWon:    { problem:"Return is too late against pace.", ideal:"45%+", causes:["Late split-step","Large backswing","Too-deep start position"], drills:["Short-backswing returns","Split-step timing","Deep-middle return targets"] },
-  unforced:     { problem:"Errors come before point construction finishes.", ideal:"14 or fewer", causes:["Rushing neutral balls","Low net margin","Changing direction too early"], drills:["20-ball consistency","Crosscourt lock","Pressure tiebreaks"] },
-};
 
 /* ─── BENCHMARKS ──────────────────────────────────────────────────────────────*/
 const B = {
@@ -71,18 +46,6 @@ const B = {
   unforced:       { label:"Unforced Errors", bench:13, unit:"",  hi:false, weight:2.2 },
   netPoints:      { label:"Net Pts Won %",   bench:62, unit:"%", hi:true,  weight:1.0 },
   breakPtsConv:   { label:"Break Pt Conv %", bench:40, unit:"%", hi:true,  weight:1.3 },
-};
-
-const emptyTournament = {
-  name: "",
-  date: "",
-  location: "",
-  entry: "",
-  flight: "",
-  hotel: "",
-  food: "",
-  transport: "",
-  notes: "",
 };
 
 /* ─── REAL MATCH DATA ─────────────────────────────────────────────────────────*/
@@ -346,23 +309,6 @@ const SurfaceBadge = ({ s }) => (
     fontSize:11, fontFamily:FONT.mono, fontWeight:700 }}>{s}</span>
 );
 
-function Videos({ metric }) {
-  const videos = videoLibrary[metric] || videoLibrary.returnWon;
-  return (
-    <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))", gap:12, marginTop:10 }}>
-      {videos.map(([title, url], index) => (
-        <a key={title} href={url} target="_blank" rel="noreferrer" style={{ display:"block", background:C.lift, border:`1px solid ${C.border}`, borderRadius:10, padding:"14px", color:C.text, textDecoration:"none" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8 }}>
-            <span style={{ width:24, height:24, borderRadius:8, background:C.clay, color:"#fff", display:"inline-flex", alignItems:"center", justifyContent:"center", fontSize:12 }}>▶</span>
-            <strong style={{ fontSize:13 }}>{title}</strong>
-          </div>
-          <small style={{ color:C.sub, fontSize:11 }}>Open video</small>
-        </a>
-      ))}
-    </div>
-  );
-}
-
 const Divider = () => <div style={{ height:1, background:C.border, margin:"0 0 20px" }} />;
 
 function IQRing({ score, size=120 }) {
@@ -372,19 +318,17 @@ function IQRing({ score, size=120 }) {
   const [label, col] = iqLabel(score);
   return (
     <div style={{ position:"relative", width:size, height:size, display:"flex",
-      alignItems:"center", justifyContent:"center", borderRadius:"50%",
-      background:`radial-gradient(circle at 30% 30%, ${C.live}18, transparent 52%)`,
-      boxShadow:`0 0 24px rgba(0,0,0,0.22)`, padding:10, animation:"pulse 3.4s ease-in-out infinite" }}>
+      alignItems:"center", justifyContent:"center" }}>
       <svg width={size} height={size} style={{ position:"absolute", transform:"rotate(-90deg)" }}>
         <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={C.border} strokeWidth={size*0.07} />
         <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={col} strokeWidth={size*0.07}
           strokeLinecap="round" strokeDasharray={`${dash} ${circ}`}
           style={{ transition:"stroke-dasharray 1.2s cubic-bezier(.4,0,.2,1)",
-            filter:`drop-shadow(0 0 8px ${col})` }} />
+            filter:`drop-shadow(0 0 6px ${col})` }} />
       </svg>
       <div style={{ textAlign:"center" }}>
         <div style={{ fontSize:size*0.22, fontWeight:900, fontFamily:FONT.mono, color:col, lineHeight:1 }}>{score}</div>
-        <div style={{ fontSize:size*0.09, color:col, letterSpacing:1.5, textTransform:"uppercase", marginTop:3 }}>{label}</div>
+        <div style={{ fontSize:size*0.09, color:col, letterSpacing:1.5, textTransform:"uppercase", marginTop:2 }}>{label}</div>
       </div>
     </div>
   );
@@ -415,21 +359,19 @@ function StatRow({ label, val, bench, unit, hi }) {
 
 function Section({ title, children, action }: any) {
   return (
-    <div style={{ marginBottom: 28 }}>
+    <div style={{ marginBottom: 24 }}>
 
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: 12,
-          marginBottom: 18,
-          flexWrap: "wrap"
+          marginBottom: 14
         }}
       >
         <span
           style={{
-            fontSize: 12,
+            fontSize: 11,
             fontWeight: 700,
             color: C.sub,
             letterSpacing: 2,
@@ -451,16 +393,8 @@ function Section({ title, children, action }: any) {
 
 function Card({ children, glow, style={} }: any) {
   return (
-    <div style={{
-      background:`linear-gradient(180deg, ${C.panel} 0%, ${C.deep} 100%)`,
-      border:`1px solid ${glow?C.clay+"55":C.border}`,
-      borderRadius:18,
-      boxShadow: glow
-        ? `0 22px 60px rgba(212,99,30,0.18)`
-        : "0 24px 60px rgba(0,0,0,0.28)",
-      padding:"22px 24px",
-      ...style
-    }}>
+    <div style={{ background:C.panel, border:`1px solid ${glow?C.clay+"66":C.border}`,
+      borderRadius:12, padding:"20px 22px", ...style }}>
       {children}
     </div>
   );
@@ -471,55 +405,40 @@ const btn = (
   disabled: any = false,
   sm: any = false
 ) => ({
-  background: primary ? `linear-gradient(135deg, ${C.clay}, ${C.purple})` : C.lift,
+  background: primary ? C.clay : C.lift,
   color: "#fff",
-  border: primary ? "1px solid transparent" : `1px solid ${C.border}`,
-  borderRadius: 14,
-  padding: sm ? "8px 16px" : "10px 20px",
+  border: primary ? "none" : `1px solid ${C.border}`,
+  borderRadius: 7,
+  padding: sm ? "6px 14px" : "9px 20px",
   fontSize: sm ? 12 : 13,
   fontWeight: 700,
   cursor: disabled ? "not-allowed" : "pointer",
-  letterSpacing: 0.5,
+  letterSpacing: 0.4,
   fontFamily: FONT.display,
-  transition: "all 220ms cubic-bezier(.4,0,.2,1)",
-  opacity: disabled ? 0.78 : 1,
-  boxShadow: primary
-    ? "0 16px 35px rgba(212,99,30,0.22)"
-    : "0 10px 24px rgba(0,0,0,0.16)",
-  minHeight: sm ? undefined : 42,
+  transition: "opacity 0.15s",
+  opacity: disabled ? 0.55 : 1,
 });
 
-const inp = {
-  background:C.mid,
-  border:`1px solid ${C.border}`,
-  color:C.text,
-  borderRadius:14,
-  padding:"12px 14px",
-  fontSize:13,
-  width:"100%",
-  fontFamily:FONT.display,
-  outline:"none",
-  boxShadow:"inset 0 1px 2px rgba(0,0,0,0.18)",
-  transition:"border-color 0.2s, box-shadow 0.2s",
-};
+const inp = { background:C.lift, border:`1px solid ${C.border}`, color:C.text,
+  borderRadius:7, padding:"9px 13px", fontSize:13, width:"100%",
+  fontFamily:FONT.display, outline:"none" };
 
 /* ─── AI PANEL ────────────────────────────────────────────────────────────────*/
 function AIBlock({ loading, text }) {
   if (!loading && !text) return null;
   return (
-    <div style={{ background:`linear-gradient(135deg, ${C.deep}, ${C.mid})`,
-      border:`1px solid ${C.clay}44`, borderRadius:18, padding:"20px 22px", marginTop:20,
-      boxShadow:"0 22px 60px rgba(0,0,0,0.18)" }}>
-      <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14 }}>
-        <span style={{ width:10, height:10, borderRadius:"50%",
+    <div style={{ background:`linear-gradient(135deg,${C.mid},${C.panel})`,
+      border:`1px solid ${C.clay}44`, borderRadius:12, padding:"18px 20px", marginTop:16 }}>
+      <div style={{ display:"flex", alignItems:"center", gap:9, marginBottom:12 }}>
+        <span style={{ width:8, height:8, borderRadius:"50%",
           background:loading?C.yellow:C.live, display:"inline-block",
-          boxShadow:`0 0 12px ${loading?C.yellow:C.live}`,
+          boxShadow:`0 0 8px ${loading?C.yellow:C.live}`,
           animation:loading?"pulse 1s infinite":"none" }} />
-        <span style={{ fontSize:11, fontWeight:700, color:C.text, letterSpacing:2, textTransform:"uppercase" }}>AI Coach</span>
+        <span style={{ fontSize:11, fontWeight:700, color:C.clay, letterSpacing:2, textTransform:"uppercase" }}>AI Coach</span>
       </div>
       {loading ? <span style={{ color:C.sub, fontSize:13 }}>Analysing patterns…</span>
         : text.split("\n").filter(Boolean).map((l,i) => (
-          <p key={i} style={{ color:l.startsWith("•")?C.text:C.sub, fontSize:13.5, lineHeight:1.75, margin:"6px 0" }}>{l}</p>
+          <p key={i} style={{ color:l.startsWith("•")?C.text:C.sub, fontSize:13.5, lineHeight:1.7, margin:"5px 0" }}>{l}</p>
         ))
       }
     </div>
@@ -544,20 +463,19 @@ function InsightCard({ insight }) {
   const [open, setOpen] = useState(false);
   return (
     <div onClick={() => setOpen(p => !p)} style={{ cursor:"pointer",
-      background:C.mid, border:`1px solid ${insight.color}33`,
-      borderLeft:`4px solid ${insight.color}`, borderRadius:16,
-      padding:"18px 20px", transition:"transform 0.2s, border-color 0.2s, background 0.2s",
-      boxShadow:"0 18px 42px rgba(0,0,0,0.16)" }}>
-      <div style={{ display:"flex", gap:12, alignItems:"flex-start" }}>
-        <span style={{ fontSize:20, lineHeight:1 }}>{insight.icon}</span>
+      background:C.lift, border:`1px solid ${insight.color}33`,
+      borderLeft:`3px solid ${insight.color}`, borderRadius:9,
+      padding:"14px 16px", transition:"border-color 0.2s" }}>
+      <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
+        <span style={{ fontSize:18, lineHeight:1 }}>{insight.icon}</span>
         <div style={{ flex:1 }}>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:10, flexWrap:"wrap" }}>
-            <p style={{ margin:0, color:C.text, fontSize:14, fontWeight:700, lineHeight:1.5 }}>{insight.text}</p>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8 }}>
+            <p style={{ margin:0, color:C.text, fontSize:13.5, fontWeight:600, lineHeight:1.4 }}>{insight.text}</p>
             <span style={{ background:insight.color+"22", color:insight.color,
-              fontSize:10, fontWeight:700, letterSpacing:1, padding:"4px 9px",
-              borderRadius:999, whiteSpace:"nowrap", flexShrink:0 }}>{insight.category}</span>
+              fontSize:10, fontWeight:700, letterSpacing:1, padding:"2px 7px",
+              borderRadius:4, whiteSpace:"nowrap", flexShrink:0 }}>{insight.category}</span>
           </div>
-          {open && <p style={{ margin:"12px 0 0", color:C.sub, fontSize:13, lineHeight:1.7 }}>{insight.detail}</p>}
+          {open && <p style={{ margin:"8px 0 0", color:C.sub, fontSize:12, lineHeight:1.5 }}>{insight.detail}</p>}
         </div>
       </div>
     </div>
@@ -566,7 +484,7 @@ function InsightCard({ insight }) {
 
 /* ─── MAIN ────────────────────────────────────────────────────────────────────*/
 export default function TennisIQ() {
-  const [matches, setMatches]     = useState(() => []);
+  const [matches, setMatches]     = useState(() => DEMO.map(m => ({...m, iq:calcIQ(m)})));
   const [tab, setTab]             = useState("coach");
   const [sel, setSel]             = useState(null);
   const [aiText, setAiText]       = useState("");
@@ -581,13 +499,6 @@ export default function TennisIQ() {
   const [toast, setToast]         = useState("");
   const [coachView, setCoachView] = useState("insights"); // insights | predict | training
   const [mode, setMode]           = useState("quick");
-  const [currentUtr, setCurrentUtr] = useState("10.1");
-  const [targetUtr, setTargetUtr] = useState("10.8");
-  const [timeframe, setTimeframe] = useState("6");
-  const [tournaments, setTournaments] = useState([]);
-  const [showTournamentForm, setShowTournamentForm] = useState(false);
-  const [editingTournamentId, setEditingTournamentId] = useState(null);
-  const [newTournament, setNewTournament] = useState({ ...emptyTournament });
   const fileRef = useRef<HTMLInputElement |null>(null);
 
   const [nm, setNm] = useState({
@@ -595,30 +506,16 @@ export default function TennisIQ() {
     date:new Date().toISOString().slice(0,10),
     firstServeIn:65,firstServeWon:76,secondServeWon:55,returnWon:45,
     aces:6,doubleFaults:3,winners:22,unforced:13,netPoints:62,breakPtsConv:40,
-   id: Date.now(),
   });
 
   const showToast = msg => { setToast(msg); setTimeout(() => setToast(""), 2800); };
 
-  const avgIQ   = matches.length ? Math.round(matches.reduce((s,m) => s+m.iq,0)/matches.length) : 0;
+  const avgIQ   = Math.round(matches.reduce((s,m) => s+m.iq,0)/matches.length);
   const wins    = matches.filter(m => m.won).length;
-  const winRate = matches.length ? Math.round((wins/matches.length)*100) : 0;
+  const winRate = Math.round((wins/matches.length)*100);
   const recent3 = matches.slice(-3);
-
-const trend =
-  recent3.length === 3
-    ? recent3[2].iq - recent3[0].iq
-    : 0;
- const best =
-  matches.length
-    ? [...matches].sort((a,b) => b.iq - a.iq)[0]
-    : {
-        iq: 0,
-        opp: "",
-        oppUTR: 0,
-        score: "",
-        surface: "Hard",
-      };
+  const trend   = recent3[2].iq - recent3[0].iq;
+  const best    = [...matches].sort((a,b) => b.iq-a.iq)[0];
 
   const avgStats = Object.keys(B).reduce((acc,k) => {
     acc[k] = Math.round(matches.reduce((s,m) => s+(m[k]||0),0)/matches.length);
@@ -648,37 +545,6 @@ const trend =
       col:SURFACE_COL[s],
     };
   }).filter(s => s.count > 0);
-
-  const tournamentTotals = tournaments.map(t => ({
-    ...t,
-    total: ["entry","flight","hotel","food","transport"].reduce((sum, key) => sum + Number(t[key] || 0), 0),
-  }));
-
-  const totalSeasonSpend = tournamentTotals.reduce((sum, t) => sum + t.total, 0);
-  const avgTournamentCost = tournaments.length ? Math.round(totalSeasonSpend / tournaments.length) : 0;
-
-  const monthlySpend = tournamentTotals.reduce((sum, t) => {
-    if (!t.date) return sum;
-    const month = t.date.slice(0, 7);
-    sum[month] = (sum[month] || 0) + t.total;
-    return sum;
-  }, {} as Record<string, number>);
-
-  const monthlySpendData = (Object.entries(monthlySpend) as [string, number][]) 
-    .sort((a,b) => b[1] - a[1])
-    .slice(0, 5);
-
-  const upcomingTournaments = tournamentTotals
-    .filter(t => t.date && !isNaN(new Date(t.date).getTime()) && new Date(t.date) >= new Date())
-    .sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-  const upcomingExpenses = upcomingTournaments.reduce((sum, t) => sum + t.total, 0);
-  const nextTournament = upcomingTournaments[0];
-
-  const expenseCategories = ["entry","flight","hotel","food","transport"];
-  const highestExpenseCategory = expenseCategories
-    .map(cat => ({ cat, total: tournamentTotals.reduce((sum, t) => sum + Number(t[cat] || 0), 0) }))
-    .sort((a,b) => b.total - a.total)[0];
 
   /* ── AI Calls ────────────────────────────────────────────────────────────── */
   async function callAI(prompt) {
@@ -760,19 +626,9 @@ Write 5 bullets: what drops vs better players, 2 biggest risks, 2 match-day adju
       )
     };
     m.iq = calcIQ(m);
-    setMatches(prev => [
-  ...prev,
-  {
-    ...nm,
-    id: Date.now(),
-  }
-]);
+    setMatches(p => [...p, m]);
     setShowAdd(false);
     showToast(`Match vs ${m.opp} logged — IQ ${m.iq}`);
-  }
-  function deleteMatch(id) {
-    setMatches(p => p.filter(m => m.id !== id));
-    showToast("Match deleted");
   }
 
   function importCSV() {
@@ -781,55 +637,6 @@ Write 5 bullets: what drops vs better players, 2 biggest risks, 2 match-day adju
     setMatches(p => [...p, ...newM]);
     setShowCSV(false); setCsvText(""); setCsvErr([]);
     showToast(`Imported ${newM.length} matches from CSV`);
-  }
-
-  function saveTournament(event: any) {
-    event.preventDefault();
-    const payload = {
-      ...newTournament,
-      id: editingTournamentId || Date.now(),
-      entry: Number(newTournament.entry||0),
-      flight: Number(newTournament.flight||0),
-      hotel: Number(newTournament.hotel||0),
-      food: Number(newTournament.food||0),
-      transport: Number(newTournament.transport||0),
-    };
-
-    if (editingTournamentId) {
-      setTournaments(all => all.map(t => t.id === editingTournamentId ? payload : t));
-      setEditingTournamentId(null);
-      showToast("Tournament updated");
-    } else {
-      setTournaments(all => [...all, payload]);
-      showToast("Tournament added");
-    }
-
-    setNewTournament({ ...emptyTournament });
-    setShowTournamentForm(false);
-  }
-
-  function editTournament(tournament: any) {
-    setNewTournament({
-      ...tournament,
-      entry: String(tournament.entry || ""),
-      flight: String(tournament.flight || ""),
-      hotel: String(tournament.hotel || ""),
-      food: String(tournament.food || ""),
-      transport: String(tournament.transport || ""),
-    });
-    setEditingTournamentId(tournament.id);
-    setShowTournamentForm(true);
-  }
-
-  function deleteTournament(id: any) {
-    setTournaments(all => all.filter(t => t.id !== id));
-    showToast("Tournament deleted");
-  }
-
-  function cancelTournamentForm() {
-    setEditingTournamentId(null);
-    setNewTournament({ ...emptyTournament });
-    setShowTournamentForm(false);
   }
 
  function handleFileUpload(e: any) {
@@ -868,32 +675,28 @@ Write 5 bullets: what drops vs better players, 2 biggest risks, 2 match-day adju
     ["coach","🧠 Coach"],["dashboard","Overview"],
     ["compare","Benchmark"],["scout","Scout"],
     ["predict","Predictor"],["progress","Progress"],["log","Log"],
-    ["planner","Planner"],["target","Target UTR"],["improve","Improvement"],["videos","Videos"],
   ];
 
   return (
-    <div style={{ minHeight:"100vh", background:`radial-gradient(circle at top, ${C.liveGlow}, transparent 22%), ${C.court}`, color:C.text,
-      fontFamily:FONT.display, fontSize:14, lineHeight:1.6 }}>
+    <div style={{ minHeight:"100vh", background:C.court, color:C.text,
+      fontFamily:FONT.display, fontSize:14, lineHeight:1.5 }}>
 
       <style>{`
         @keyframes pulse{0%,100%{opacity:.4;transform:scale(.8)}50%{opacity:1;transform:scale(1.1)}}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
         *{box-sizing:border-box;}
-        button, input, select, textarea, code { font-family: inherit; }
-        button{transition:all .22s ease; border-radius:14px;}
-        button:hover:not(:disabled){transform:translateY(-1px);}
-        button:focus-visible{outline:2px solid ${C.live}; outline-offset:3px;}
-        input,select,textarea{outline:none; background:${C.mid}; color:${C.text};}
-        input:focus,select:focus,textarea:focus{border-color:${C.live}!important; box-shadow:0 0 0 4px rgba(0,229,160,0.14);}
-        table{border-collapse:separate; border-spacing:0 12px; width:100%;}
-        th,td{background:${C.deep}; border:none; padding:14px 16px;}
-        th{color:${C.sub}; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:700;}
-        td{font-size:13px; color:${C.text}; vertical-align:middle;}
-        tr:hover td{background:${C.lift}88; cursor:pointer;}
-        ::-webkit-scrollbar{width:7px;height:7px}
+        ::-webkit-scrollbar{width:5px;height:5px}
         ::-webkit-scrollbar-track{background:${C.court}}
-        ::-webkit-scrollbar-thumb{background:${C.lift};border-radius:999px}
+        ::-webkit-scrollbar-thumb{background:${C.lift};border-radius:3px}
+        input,select,textarea{outline:none}
+        input:focus,select:focus,textarea:focus{border-color:${C.clay}!important}
+        button:hover{opacity:.85}
+        table{border-collapse:collapse;width:100%}
+        th{color:${C.sub};font-size:11px;letter-spacing:1.5px;text-transform:uppercase;
+           padding:9px 14px;border-bottom:1px solid ${C.border};text-align:left;font-weight:600}
+        td{padding:12px 14px;border-bottom:1px solid ${C.border}22;font-size:13px}
+        tr:hover td{background:${C.lift}55;cursor:pointer}
       `}</style>
 
       {/* Toast */}
@@ -908,9 +711,8 @@ Write 5 bullets: what drops vs better players, 2 biggest risks, 2 match-day adju
 
       {/* Header */}
       <div style={{ background:`linear-gradient(180deg,${C.deep} 0%,${C.court} 100%)`,
-        borderBottom:`1px solid ${C.border}`, padding:"18px 28px",
-        display:"flex", alignItems:"center", justifyContent:"space-between",
-        boxShadow:"0 24px 70px rgba(0,0,0,0.24)" }}>
+        borderBottom:`1px solid ${C.border}`, padding:"14px 28px",
+        display:"flex", alignItems:"center", justifyContent:"space-between" }}>
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
           <svg width="32" height="32" viewBox="0 0 32 32">
             <rect width="32" height="32" rx="8" fill={C.clay} />
@@ -938,21 +740,21 @@ Write 5 bullets: what drops vs better players, 2 biggest risks, 2 match-day adju
       </div>
 
       {/* Nav */}
-      <div style={{ display:"flex", gap:10, padding:"14px 28px",
+      <div style={{ display:"flex", gap:2, padding:"10px 28px",
         borderBottom:`1px solid ${C.border}`, background:C.deep, overflowX:"auto" }}>
         {TABS.map(([id,label]) => (
           <button key={id} onClick={() => { setTab(id); setAiText(""); setSel(null); }}
-            style={{ padding:"10px 18px", borderRadius:999, border:"1px solid transparent", cursor:"pointer",
-              fontSize:13, fontWeight:700, letterSpacing:0.5,
-              background:tab===id?`linear-gradient(135deg, ${C.clay}, ${C.purple})`:C.lift,
-              color:tab===id?"#fff":C.sub, transition:"all .25s ease", fontFamily:FONT.display,
-              whiteSpace:"nowrap", boxShadow:tab===id?`0 18px 46px rgba(212,99,30,0.18)`:"none" }}>
+            style={{ padding:"7px 16px", borderRadius:7, border:"none", cursor:"pointer",
+              fontSize:12.5, fontWeight:tab===id?700:500, letterSpacing:0.3,
+              background:tab===id?C.clay:"transparent",
+              color:tab===id?"#fff":C.sub, transition:"all .2s", fontFamily:FONT.display,
+              whiteSpace:"nowrap" }}>
             {label}
           </button>
         ))}
       </div>
 
-      <div style={{ padding:"30px 28px 42px", maxWidth:1180, margin:"0 auto", display:"flex", flexDirection:"column", gap:26 }}>
+      <div style={{ padding:"26px 28px", maxWidth:1060, margin:"0 auto" }}>
 
         {/* ══ COACH TAB ══════════════════════════════════════════════════════*/}
         {tab === "coach" && (
@@ -1274,187 +1076,18 @@ Format as 5 bullets with specific drills, durations, and goals. Start each with 
           </div>
         )}
 
-        {/* ══ TOURNAMENT PLANNER ═══════════════════════════════════════════════*/}
-        {tab === "planner" && (
-          <div style={{ animation:"fadeUp .4s ease" }}>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))", gap:14, marginBottom:22 }}>
-              {[
-                { label:"Season Budget", value:`$${totalSeasonSpend.toLocaleString()}`, sub:`${tournaments.length} tournaments`, color:C.live },
-                { label:"Average Cost", value:`$${avgTournamentCost.toLocaleString()}`, sub:"Per tournament", color:C.yellow },
-                { label:"Upcoming Spend", value:`$${upcomingExpenses.toLocaleString()}`, sub: nextTournament ? `Next: ${nextTournament.name}` : "No upcoming events", color:C.clay },
-                { label:"Top Expense", value: highestExpenseCategory?.cat ? highestExpenseCategory.cat : "N/A", sub:`$${highestExpenseCategory?.total||0}`, color:C.purple },
-              ].map(item => (
-                <Card key={item.label} style={{ padding:"18px 20px", borderRadius:16 }}>
-                  <div style={{ fontSize:11, color:C.sub, letterSpacing:1.5, textTransform:"uppercase", marginBottom:8 }}>{item.label}</div>
-                  <div style={{ fontSize:28, fontWeight:900, fontFamily:FONT.mono, color:item.color }}>{item.value}</div>
-                  <div style={{ fontSize:11, color:C.sub, marginTop:6 }}>{item.sub}</div>
-                </Card>
-              ))}
-            </div>
-
-            <div style={{ display:"grid", gridTemplateColumns:"1.2fr 0.8fr", gap:18, marginBottom:18, alignItems:"start" }}>
-              <Card>
-                <Section title="Budget Momentum">
-                  {monthlySpendData.length ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={monthlySpendData.map(([month, total]) => ({ month, total }))}>
-                        <CartesianGrid stroke={C.border} strokeDasharray="3 3" vertical={false} />
-                        <XAxis dataKey="month" tick={{ fill:C.sub, fontSize:11 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fill:C.sub, fontSize:11 }} axisLine={false} tickLine={false} />
-                        <Tooltip contentStyle={{ background:C.mid, border:`1px solid ${C.border}`, borderRadius:8, color:C.text, fontSize:12 }} />
-                        <Bar dataKey="total" fill={C.clay} radius={[10,10,0,0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <p style={{ color:C.sub, fontSize:13, margin:0 }}>Plan tournaments to populate monthly spend and budget trends.</p>
-                  )}
-                </Section>
-              </Card>
-
-              <Card>
-                <Section title="Planner Summary" action={
-                  <button style={btn(true)} onClick={() => setShowTournamentForm(true)}>
-                    Add Event
-                  </button>
-                }>
-                  <div style={{ fontSize:13, color:C.sub, marginBottom:16, lineHeight:1.75 }}>
-                    Keep travel, entry and hospitality costs aligned with your season budget.
-                    Use the planner to manage upcoming events, compare expenses, and keep next tournament preparation on track.
-                  </div>
-                  <div style={{ display:"grid", gap:8 }}>
-                    <div style={{ display:"flex", justifyContent:"space-between", gap:10 }}>
-                      <span style={{ color:C.sub }}>Upcoming tournaments</span>
-                      <strong style={{ color:C.text }}>{upcomingTournaments.length}</strong>
-                    </div>
-                    <div style={{ display:"flex", justifyContent:"space-between", gap:10 }}>
-                      <span style={{ color:C.sub }}>Next event</span>
-                      <strong style={{ color:C.text }}>{nextTournament ? `${nextTournament.name} · ${nextTournament.date}` : "None"}</strong>
-                    </div>
-                    <div style={{ display:"flex", justifyContent:"space-between", gap:10 }}>
-                      <span style={{ color:C.sub }}>Forecasted spend</span>
-                      <strong style={{ color:C.text }}>${upcomingExpenses.toLocaleString()}</strong>
-                    </div>
-                  </div>
-                </Section>
-
-                {showTournamentForm && (
-                  <Section title={editingTournamentId ? "Edit Tournament" : "New Tournament"} action={
-                    <button style={btn(false,false,true)} onClick={cancelTournamentForm}>Cancel</button>
-                  }>
-                    <form onSubmit={saveTournament} style={{ display:"grid", gap:12 }}>
-                      {[
-                        ["name","Tournament"], ["date","Date"], ["location","Location"],
-                        ["entry","Entry"], ["flight","Flight"], ["hotel","Hotel"],
-                        ["food","Food"], ["transport","Transport"], ["notes","Notes"],
-                      ].map(([key,label]) => (
-                        <div key={key} style={{ display:"grid", gap:6 }}>
-                          <label style={{ fontSize:12, color:C.sub, fontWeight:700 }}>{label}</label>
-                          {key === "notes" ? (
-                            <textarea
-                              name={key}
-                              value={newTournament[key]}
-                              onChange={e => setNewTournament(prev => ({ ...prev, [key]: e.target.value }))}
-                              style={{ ...inp, minHeight:88, resize:"vertical" }}
-                            />
-                          ) : (
-                            <input
-                              name={key}
-                              type={key === "date" ? "date" : "text"}
-                              value={newTournament[key]}
-                              onChange={e => setNewTournament(prev => ({ ...prev, [key]: e.target.value }))}
-                              style={inp}
-                            />
-                          )}
-                        </div>
-                      ))}
-                      <button type="submit" style={btn(true)}>
-                        {editingTournamentId ? "Save Changes" : "Save Tournament"}
-                      </button>
-                    </form>
-                  </Section>
-                )}
-              </Card>
-            </div>
-
-            <Card>
-              <Section title={`Tournament Schedule (${tournaments.length})`} action={
-                <button style={btn(true)} onClick={() => setShowTournamentForm(true)}>New Tournament</button>
-              }>
-                {tournaments.length === 0 ? (
-                  <p style={{ color:C.sub, fontSize:13, margin:0 }}>Your planner is empty. Add a tournament to start tracking budget and travel costs.</p>
-                ) : (
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Date</th>
-                        <th>Location</th>
-                        <th>Cost</th>
-                        <th style={{ textAlign:"right" }}>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {tournaments.map(t => {
-                        const total = ["entry","flight","hotel","food","transport"].reduce(
-                          (sum, key) => sum + Number(t[key] || 0), 0);
-                        return (
-                          <tr key={t.id}>
-                            <td>{t.name || "Untitled"}</td>
-                            <td>{t.date}</td>
-                            <td>{t.location || "TBD"}</td>
-                            <td>${total.toLocaleString()}</td>
-                            <td style={{ textAlign:"right", display:"flex", justifyContent:"flex-end", gap:8 }}>
-                              <button type="button" onClick={() => editTournament(t)} style={{ ...btn(false,false,true), minWidth:88 }}>Edit</button>
-                              <button type="button" onClick={() => deleteTournament(t.id)} style={{ ...btn(false,false,true), background:"#ef4444" }}>Delete</button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                )}
-              </Section>
-            </Card>
-          </div>
-        )}
-
         {/* ══ BENCHMARK ══════════════════════════════════════════════════════*/}
         {tab === "compare" && (
           <div style={{ animation:"fadeUp .4s ease" }}>
             <Card style={{ marginBottom:18 }}>
               <Section title="Select Match">
                 <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-                  {matches.map((m) => ( 
-  <div key={m.id} style={{ display:"flex", gap:8, alignItems:"center" }}>
-
-    <button
-      onClick={() => {
-        setSel(m);
-        setAiText("");
-      }}
-      style={btn(sel?.id === m.id, true)}
-    >
-      vs {m.opp} · <span style={{ fontFamily: FONT.mono }}>{m.iq}</span>
-    </button>
-
-    <button
-      onClick={() => deleteMatch(m.id)}
-      style={{
-        background:"#ef4444",
-        color:"white",
-        border:"none",
-        borderRadius:8,
-        padding:"6px 12px",
-        cursor:"pointer",
-        fontWeight:700
-      }}
-    >
-      Delete
-    </button>
-
-  </div>
-))}
-                   
+                  {matches.map(m => (
+                    <button key={m.id} onClick={() => { setSel(m); setAiText(""); }}
+                      style={btn(sel?.id===m.id, true)}>
+                      vs {m.opp} · <span style={{ fontFamily:FONT.mono }}>{m.iq}</span>
+                    </button>
+                  ))}
                 </div>
               </Section>
             </Card>
